@@ -1,0 +1,12 @@
+{
+  "type": "record",
+  "name": "LoanAccountCreated",
+  "namespace": "com.example",
+  "fields": [
+    {"name": "accountNumber", "type": "string"},
+    {"name": "customerName", "type": "string"},
+    {"name": "loanAmount", "type": "double"},
+    {"name": "loanStartDate", "type": "string", "logicalType": "date"},
+    {"name": "loanEndDate", "type": "string", "logicalType": "date"}
+  ]
+}
