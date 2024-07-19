@@ -1,1 +1,31 @@
-"Test content" 
+ private NonDecomposeFormat createNonDecomposeFormatFromRecord(SinkRecord record) {
+        NonDecomposeFormat nonDecomposeFormat = (NonDecomposeFormat) avroDeserializer.deserialize(record.topic(), (byte[]) record.value());
+        nonDecomposeFormat.setEventId(String.valueOf(getHeaderValue(record, "id")));
+        nonDecomposeFormat.setPartition(String.valueOf(record.kafkaPartition()));
+        nonDecomposeFormat.setUpdDate(String.valueOf(getHeaderValue(record, "updDate")));
+        nonDecomposeFormat.setPublishTimestampStr(String.valueOf(getHeaderValue(record, "publishedTimestamp")));
+        nonDecomposeFormat.setPayload1(new String((byte[]) record.value(), StandardCharsets.UTF_8));
+        nonDecomposeFormat.setTopic(record.topic());
+        nonDecomposeFormat.setEventName(String.valueOf(getHeaderValue(record, "sub")));
+        nonDecomposeFormat.setEventVersionNumber(String.valueOf(getHeaderValue(record, "ver")));
+        nonDecomposeFormat.setExecutionTimestampStr(String.valueOf(getHeaderValue(record, "executionTimestamp")));
+
+        // Convert the NonDecomposeFormat object to JSON
+        try {
+            String jsonString = convertToJSON(nonDecomposeFormat);
+            nonDecomposeFormat.setPayload(jsonString); // Store the formatted JSON string
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return nonDecomposeFormat;
+    }
+
+    private String convertToJSON(NonDecomposeFormat nonDecomposeFormat) throws IOException {
+        SpecificDatumWriter<NonDecomposeFormat> writer = new SpecificDatumWriter<>(NonDecomposeFormat.class);
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        JsonEncoder jsonEncoder = EncoderFactory.get().jsonEncoder(NonDecomposeFormat.getClassSchema(), outputStream);
+        writer.write(nonDecomposeFormat, jsonEncoder);
+        jsonEncoder.flush();
+        return outputStream.toString(StandardCharsets.UTF_8);
+    }
